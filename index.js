@@ -8,6 +8,7 @@ var buildDecode = require('./lib/decoder')
 var buildEncode = require('./lib/encoder')
 var IncompleteBufferError = require('./lib/helpers.js').IncompleteBufferError
 var DateCodec = require('./lib/codecs/DateCodec')
+var LZ4Dec = require('./lib/codecs/LZ4');
 
 function msgpack (options) {
   var encodingTypes = []
@@ -22,10 +23,13 @@ function msgpack (options) {
   }
 
   decodingTypes.set(DateCodec.type, DateCodec.decode)
+  decodingTypes.set(LZ4Dec.type, LZ4Dec.decode)
   if (!options.disableTimestampEncoding) {
     encodingTypes.push(DateCodec)
   }
 
+  LZ4Dec.init(buildDecode(decodingTypes));
+  
   function registerEncoder (check, encode) {
     assert(check, 'must have an encode function')
     assert(encode, 'must have an encode function')
